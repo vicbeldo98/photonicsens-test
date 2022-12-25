@@ -6,6 +6,8 @@
 #include <opencv4/opencv2/imgproc/imgproc.hpp>
 #include <math.h>
 #include <iostream>
+#include <omp.h>
+#include <time.h>
 
 
 using namespace cv;
@@ -13,16 +15,21 @@ using namespace std;
 
 
 Mat sobelFilter(Mat originalImage){
-
+    
+    // Define rows and columns shape
     int rows = originalImage.rows;
     int cols = originalImage.cols;
 
+    // Define matrix to convolve and result matrix
     Mat paddedImage, targetImage;
 
-    targetImage = originalImage.clone();
+    // Initialize result matrix
+    targetImage = Mat(rows, cols, originalImage.type());
 
+    // Create padding
     copyMakeBorder(originalImage, paddedImage, 1, 1, 1, 1, BORDER_REPLICATE);
 
+    // Define kernel direction
     float kernelx[3][3] = { 
         {  1, 0, -1 },
         {  2, 0, -2 },
@@ -34,9 +41,15 @@ Mat sobelFilter(Mat originalImage){
         { 0,  0,  0 },
         { 1,  2,  1 }
     };
+    
+    // set number of threads
+    omp_set_num_threads(16);
 
+    // iterate over all pixels parallelising
+    #pragma omp parallel for shared(targetImage) collapse(2)
     for(int row = 1; row < rows; row++){
         for(int column = 1; column < cols; column++){
+            // for each pixel, compute the change of intensity in both directions
             double intensityChangeRow = 0;
             double intensityChangeCol = 0;
 
@@ -50,10 +63,8 @@ Mat sobelFilter(Mat originalImage){
                     intensityChangeCol += targetValue * kernely[kernelRow][kernelCol];
                 }
             }
-
-            double resultForPixel = sqrt( pow(intensityChangeRow, 2) + pow(intensityChangeCol, 2))/8;
-
-            targetImage.at<uchar>(row, column) = resultForPixel;
+            // update with new value each pixel
+            targetImage.at<uchar>(row, column) = sqrt( pow(intensityChangeRow, 2) + pow(intensityChangeCol, 2))/8;
         }
     }
 
@@ -63,26 +74,30 @@ Mat sobelFilter(Mat originalImage){
 
 int main()
 {
-    // Define image path and read
-    std::string image_path = samples::findFile("images/lena.png");
-    Mat img = imread(image_path, IMREAD_GRAYSCALE);
+    // Initialize time
+    double beginTime = clock();
+
+    // Define paths
+    string imagePath = samples::findFile("images/lena.png");
+    string targetImagePath = "images/lena_sobel.png";
+
+    // Read image
+    Mat img = imread(imagePath, IMREAD_GRAYSCALE);
 
     if(img.empty())
     {
-        std::cout << "Could not read the image: " << image_path << std::endl;
+        cout << "Could not read the image: " << imagePath << endl;
         return 1;
     }
-
-    // Display image
-    imshow("Image", img);
-    waitKey(0);
 
     // Apply sobel filter to the image
     Mat result = sobelFilter(img);
 
-    // Display image with Sobel filter
-    imshow("Image", result);
-    waitKey(0);
+    // Save image with Sobel filter
+    imwrite(targetImagePath, result);
+
+    // Seconds spent
+    cout << "SECONDS SPENT: " << float( clock () - beginTime )/CLOCKS_PER_SEC << endl;
 
     return 0;
 }
