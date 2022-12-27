@@ -4,22 +4,23 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.ImageDecoder;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ImageView;
-
-import java.io.File;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
+    static {
+        System.loadLibrary("native-lib");
+    }
 
     private int REQUEST_PICK_IMAGE=1000;
 
     private ImageView imageView;
+
+    private native void applyFilter(String origin, String dst);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         if( resultCode == RESULT_OK){
             if(requestCode == REQUEST_PICK_IMAGE) {
+                applyFilter("images/lena.jpg", "images/lena_filter.jpg");
                 Uri uri = data.getData();
                 Bitmap bitmap = loadFromUri(uri);
                 imageView.setImageBitmap(bitmap);
