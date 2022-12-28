@@ -14,3 +14,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Sobel_application"
 include ':app'
+include ':opencv'
+include ':opencv'

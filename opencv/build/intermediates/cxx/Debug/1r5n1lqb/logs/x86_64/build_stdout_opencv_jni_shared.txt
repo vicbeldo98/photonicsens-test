@@ -1,0 +1,2 @@
+ninja: Entering directory `/home/vicbeldo/Escritorio/photonicsens-test/opencv/.cxx/Debug/1r5n1lqb/x86_64'
+ninja: no work to do.

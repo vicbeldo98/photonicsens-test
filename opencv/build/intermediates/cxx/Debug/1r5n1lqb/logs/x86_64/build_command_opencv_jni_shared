@@ -1,0 +1,4 @@
+/home/vicbeldo/Android/Sdk/cmake/3.18.1/bin/ninja \
+  -C \
+  /home/vicbeldo/Escritorio/photonicsens-test/opencv/.cxx/Debug/1r5n1lqb/x86_64 \
+  opencv_jni_shared

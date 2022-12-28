@@ -1,0 +1,1 @@
+/home/vicbeldo/Escritorio/photonicsens-test/opencv/build/intermediates/cxx/RelWithDebInfo/2o1x5e42/obj/x86
